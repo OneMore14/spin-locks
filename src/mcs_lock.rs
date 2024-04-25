@@ -81,17 +81,26 @@ impl MSCLockInner {
     }
 }
 
-struct Record {
-    locked: AtomicBool,
-    next: AtomicPtr<Record>,
+pub(crate) struct Record {
+    pub locked: AtomicBool,
+    pub next: AtomicPtr<Record>,
 }
 
 impl Record {
-    fn new() -> Record {
+    pub fn new() -> Record {
         Record {
             locked: AtomicBool::new(false),
             next: AtomicPtr::new(ptr::null_mut()),
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.locked.store(false, Release);
+        self.next.store(ptr::null_mut(), Release);
+    }
+
+    pub fn lock(&self) {
+        self.locked.store(true, Release);
     }
 }
 
